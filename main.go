@@ -24,7 +24,7 @@ Options:`)
 		Format uint
 	}{}
 	flag.UintVar(&args.Bits, "b", 256, "number of bits [supports: 2,...,255,...]")
-	flag.UintVar(&args.Format, "f", 10, "format of output [supports: 2,10,16,64]")
+	flag.UintVar(&args.Format, "f", 10, "format of output [supports: 0,2,10,16,64]")
 	flag.Parse()
 	if args.Bits <= 1 {
 		log.Fatalf("error: bits must be positive integer > 1, not %d", args.Bits)
