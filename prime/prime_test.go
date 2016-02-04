@@ -93,10 +93,12 @@ func TestIsSquare(t *testing.T) {
 		}
 	}
 	// random tests
-	for i := 0; i < 100; i++ {
-		x := randBig(1000)
-		require.True(t, IsSquare(new(big.Int).Mul(x, x)))
-		require.False(t, IsSquare(new(big.Int).Mul(x, new(big.Int).Add(x, one))))
+	for i := 0; i < 1000; i++ {
+		x := randBig(100)
+		sq := new(big.Int).Mul(x, x)
+		notsq := new(big.Int).Mul(x, new(big.Int).Add(x, one))
+		require.True(t, IsSquare(sq), fmt.Sprintf("rand sq=%d", sq))
+		require.False(t, IsSquare(notsq), fmt.Sprintf("rand notsq=%d", notsq))
 	}
 }
 

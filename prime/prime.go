@@ -378,8 +378,7 @@ func IsSquare(N *big.Int) bool {
 	}
 
 	// Step 0: Easy case
-	d := N.BitLen()
-	if d < 64 {
+	if N.BitLen() < 62 { // need padding, 63 is too close to limit
 		n := N.Int64()
 		a := int64(math.Sqrt(float64(n)))
 		if a*a == n {
@@ -395,9 +394,8 @@ func IsSquare(N *big.Int) bool {
 	}
 
 	// Step 1: Check if it is a square mod something small
-	var n big.Int
-	n.Set(N)
-	n.Mod(n.Rsh(&n, s), smallSquareMod)
+	n := new(big.Int).Rsh(N, s)
+	n.Mod(n, smallSquareMod)
 	if n.Sign() > 0 {
 		m := uint16(n.Bits()[0]) // ok because smallSquareMod < 2^16
 		i := sort.Search(len(smallSquares), func(i int) bool { return smallSquares[i] >= m })
@@ -406,31 +404,21 @@ func IsSquare(N *big.Int) bool {
 		}
 	}
 
-	// Step 2: make a random guess for sqrt
-	// with the right order of magnitude
-	bytes := make([]byte, d/16)
-	rand.Read(bytes)
-	var x, y, delta big.Int
-	x.SetBytes(bytes)
-	y.Set(&x)
-
-	// Step 3: run newtons method until it
-	// stabilized (same value or one off), see wiki article
-	// http://en.wikipedia.org/wiki/Integer_square_root
-	// if it doesn't converge it should alternate between +-1
-	// so return false in that case
-	// convergence is fast, should take log(number of digits)
-	// with some coefficient... 4 seems like it works
-	for i := 0; ; i++ {
+	// Step 2: run newtons method, see
+	// Cohen's book computational alg. number theory
+	// Ch. 1, algorithm 1.7.1
+	z := new(big.Int)
+	x := new(big.Int).Lsh(one, uint(N.BitLen()+2)>>1)
+	y := new(big.Int)
+	for {
 		// Set y = [(x + [N/x])/2]
-		y.Rsh(y.Add(&y, x.Div(N, &x)), 1) // note: at this point y = x
-		if i > int(math.Log(float64(d)))*4 {
-			delta.Sub(&x, &y)
-			if len(delta.Bits()) == 0 || delta.Bits()[0] == 1 {
-				// if |x - y| <= 1
-				return delta.Mul(&x, &x).Cmp(N) == 0
-			}
+		y := y.Rsh(z.Add(x, z.Div(N, x)), 1)
+		// if y < x, set x to y
+		// else return x
+		if y.Cmp(x) == -1 {
+			x.Set(y)
+		} else {
+			return z.Mul(x, x).Cmp(N) == 0
 		}
-		x.Set(&y)
 	}
 }
