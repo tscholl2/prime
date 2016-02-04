@@ -387,21 +387,15 @@ func IsSquare(N *big.Int) bool {
 		return false
 	}
 
-	// Step 0.5: Check N has an even number of factors of 2
-	s := trailingZeroBits(N)
-	if s%2 != 0 {
+	// Step 1.1: check if it is a square mod small power of 2
+	if _, ok := squaresMod128[uint8(N.Uint64())]; !ok {
 		return false
 	}
 
-	// Step 1: Check if it is a square mod something small
-	n := new(big.Int).Rsh(N, s)
-	n.Mod(n, smallSquareMod)
-	if n.Sign() > 0 {
-		m := uint16(n.Bits()[0]) // ok because smallSquareMod < 2^16
-		i := sort.Search(len(smallSquares), func(i int) bool { return smallSquares[i] >= m })
-		if i < 0 || i >= len(smallSquares) || m != smallSquares[i] {
-			return false
-		}
+	// Setp 1.2: check if it is a square mod a small number
+	_z := uint16(new(big.Int).Mod(N, smallSquareMod).Uint64())
+	if _, ok := smallSquares[_z]; !ok {
+		return false
 	}
 
 	// Step 2: run newtons method, see
