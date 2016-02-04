@@ -2,21 +2,24 @@
 prime number tool for the command line
 
 ```
-usage: prime [--bits BITS] [--base BASE]
-
-options:
-  --bits BITS, -b BITS   number of bits [default: 256]
-  --base BASE, -f BASE   format output base f [default: 10]
-  --help, -h             display this help and exit
+prime: generate a prime number and print to stdout
+Example: 'prime -f 16 -b 128' prints: 83b19881300529d1fd4dac680415c60f
+Example: 'prime -f 64 -b 256' prints: zUwiK96O4sy6pm3LtQM5YtRP9L4RGxsU/zCNliZZXn0=
+Example: 'prime -f  0 -b 1024 > p.bytes' saves the raw bytes to the file 'p.bytes'
+Options:
+  -b int
+    	number of bits [supports: 2,...,128,...] (default 128)
+  -f int
+    	format of output [supports: 0,2-36,64,85] (default 10)
 ```
 
 # Examples
 
 ```
-$ prime
-61833596433133995117132293669752332987439828347081021559069762664341520331311
-$ prime -b 128 -f 16
-f72f3e72feb9cc3e030a6a5c8873dd49
-$ prime -b 256 -f 64
-/ICHR9xHQ843HisAED723qiesV1LtzxHEzSFPOPL3bc=
+$prime -f 16 -b 128
+83b19881300529d1fd4dac680415c60f
+$prime -f 64 -b 256
+zUwiK96O4sy6pm3LtQM5YtRP9L4RGxsU/zCNliZZXn0=
+$prime -f  0 -b 1024 > p.bytes
+saves the raw bytes to the file 'p.bytes'
 ```
