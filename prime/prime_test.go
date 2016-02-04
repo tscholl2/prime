@@ -92,6 +92,12 @@ func TestIsSquare(t *testing.T) {
 			assert.Equal(t, c.want, IsSquare(c.in), fmt.Sprintf("in=%d", c.in))
 		}
 	}
+	// random tests
+	for i := 0; i < 100; i++ {
+		x := randBig(1000)
+		require.True(t, IsSquare(new(big.Int).Mul(x, x)))
+		require.False(t, IsSquare(new(big.Int).Mul(x, new(big.Int).Add(x, one))))
+	}
 }
 
 func TestStrongLucasSelfridgeTest(t *testing.T) {
