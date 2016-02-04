@@ -60,7 +60,9 @@ func NextPrime(N *big.Int) (p *big.Int) {
 	}
 	if N.BitLen() <= 10 {
 		n := uint16(N.Int64())
-		i := sort.Search(len(primes10), func(i int) bool { return primes10[i] >= n })
+		i := sort.Search(len(primes10), func(i int) bool {
+			return primes10[i] >= n
+		})
 		if i < len(primes10) {
 			return big.NewInt(int64(primes10[i]))
 		}
@@ -123,8 +125,10 @@ func SmallPrimeTest(N *big.Int) int {
 		panic("SmallPrimeTest for positive integers only")
 	}
 	if N.BitLen() <= 10 {
-		n := uint16(N.Int64())
-		i := sort.Search(len(primes10), func(i int) bool { return primes10[i] >= n })
+		n := uint16(N.Uint64())
+		i := sort.Search(len(primes10), func(i int) bool {
+			return primes10[i] >= n
+		})
 		if i >= len(primes10) || n != primes10[i] {
 			return 0
 		}
