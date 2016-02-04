@@ -1,3 +1,8 @@
+/*
+Package prime is another prime library for various prime number
+related functions. Mostly written just to learn Go and
+computational number theory in another language.
+*/
 package prime
 
 import (
