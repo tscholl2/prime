@@ -420,11 +420,11 @@ func IsSquare(N *big.Int) bool {
 	// if it doesn't converge it should alternate between +-1
 	// so return false in that case
 	// convergence is fast, should take log(number of digits)
-	// with some coefficient... 5 seems like it works
+	// with some coefficient... 4 seems like it works
 	for i := 0; ; i++ {
 		// Set y = [(x + [N/x])/2]
 		y.Rsh(y.Add(&y, x.Div(N, &x)), 1) // note: at this point y = x
-		if i > int(math.Log(float64(d)))*5 {
+		if i > int(math.Log(float64(d)))*4 {
 			delta.Sub(&x, &y)
 			if len(delta.Bits()) == 0 || delta.Bits()[0] == 1 {
 				// if |x - y| <= 1

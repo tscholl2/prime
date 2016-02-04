@@ -20,6 +20,14 @@ func BenchmarkJacobiSymbol(b *testing.B) {
 	}
 }
 
+func BenchmarkJacobiSymbolStandard(b *testing.B) {
+	benchmarkOdd, _ := new(big.Int).SetString("3ba9a88eb20cfdfe4a380607f5025cdcd0f0bbb73b6f8d45bb0d7bdcd7d485b513d4f8c3d0d572f47ea6f32b4d19978c1a578f919c126e997548b8d0acc64284287a3a321e292e1be9614bf21254011a25df84b77b7411d41e65fd50298fc4660651580b5bd3f38377e2a6260021694cb4096873762f45ba41562ed1cddaca69", 16)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		big.Jacobi(benchmarkPrime, benchmarkOdd)
+	}
+}
+
 func BenchmarkIsSquareTrue(b *testing.B) {
 	largetrue, _ := new(big.Int).SetString("3b17f061370666c4f11db552e1dc533fbf30531421a6292207fd136a94f9f011e672a24f0ef1422210ab44f96e43599d6576030ded2b0f9c79fc8b8efd8558f09c168e35895707d7749fb92e18d9f0653efdc05daeee522204766c6aea0f2dbc5793beabbd629e69b38f5c0c56a37fd4ceb27d667ab9d1b098dae5beec2d3bfa96be55a3b9262d5662429ba76fb4f359d5674c0d861c81", 16)
 	b.ResetTimer()
