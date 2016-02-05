@@ -1,9 +1,9 @@
 package prime
 
 import (
-	cryptoRand "crypto/rand"
+	"crypto/rand"
 	"math/big"
-	"math/rand"
+	random "math/rand"
 	"testing"
 )
 
@@ -52,7 +52,7 @@ func BenchmarkIsSquareRandomNumber(b *testing.B) {
 
 func BenchmarkTrailingZeroBits(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		trailingZeroBits(new(big.Int).Lsh(randBig(1024), uint(rand.Intn(100))))
+		trailingZeroBits(new(big.Int).Lsh(randBig(1024), uint(random.Intn(100))))
 	}
 }
 
@@ -90,6 +90,14 @@ func BenchmarkStrongLucasSelfridgeTest(b *testing.B) {
 	}
 }
 
+func BenchmarkStrongLucasSelfridgeTestRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		x := randBig(1024)
+		x.SetBit(x, 0, 1)
+		StrongLucasSelfridgeTest(x)
+	}
+}
+
 // primality wrappers
 
 func BenchmarkNextPrime(b *testing.B) {
@@ -106,7 +114,7 @@ func BenchmarkRandPrime(b *testing.B) {
 
 func BenchmarkCryptoRandPrime(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		cryptoRand.Prime(cryptoRand.Reader, 1024)
+		rand.Prime(rand.Reader, 1024)
 	}
 }
 

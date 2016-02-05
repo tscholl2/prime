@@ -225,6 +225,7 @@ func StrongLucasSelfridgeTest(N *big.Int) bool {
 			D.Add(D, two)
 		}
 		D.Neg(D)
+
 	}
 	P := big.NewInt(1) // Selfridge's choice, also set on wiki package
 	// http://en.wikipedia.org/wiki/Lucas_pseudoprime#Implementing_a_Lucas_probable_prime_test
