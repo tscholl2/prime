@@ -134,7 +134,21 @@ func SmallPrimeTest(N *big.Int) int {
 		}
 		return 1
 	}
-	if new(big.Int).GCD(nil, nil, N, prodPrimes10).Cmp(one) == 1 {
+	// quick test for N even
+	if N.Bits()[0]&1 == 0 {
+		return 0
+	}
+	z := new(big.Int)
+	if z.GCD(nil, nil, N, prodPrimes10A).Cmp(one) == 1 {
+		return 0
+	}
+	if z.GCD(nil, nil, N, prodPrimes10B).Cmp(one) == 1 {
+		return 0
+	}
+	if z.GCD(nil, nil, N, prodPrimes10C).Cmp(one) == 1 {
+		return 0
+	}
+	if z.GCD(nil, nil, N, prodPrimes10D).Cmp(one) == 1 {
 		return 0
 	}
 	return -1

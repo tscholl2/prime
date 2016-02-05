@@ -30,7 +30,10 @@ var (
 		839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937,
 		941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021}
 	// all primes < 10 bits and their product
-	prodPrimes10, _ = new(big.Int).SetString("613a0497aa700632594668d2175f6874157ab081f7d649a3e936c6608f20575cb03949974ef1fb62db814d5fdf2c0d0e2d0abb2b26e8cc08403e32336e4bf96f1ffa1b71d1f4c342dc3812e17d7035b9e93905bff2c1a6de", 16)
+	prodPrimes10A, _ = new(big.Int).SetString("24776ffd3cbd21c872eccd26ad078c5ba0586e2e57cf68515e3c4828a673a6e", 16)
+	prodPrimes10B, _ = new(big.Int).SetString("b4aec292f0e79567889c96d7d7eca2aa680bc5727ba136196bc1c1826d0f8b905b973bbda3a499ec8ef236d53", 16)
+	prodPrimes10C, _ = new(big.Int).SetString("6b28164a8d4a8de74906e6ffd83a870d624f94e5bfeede063dfa6dcfcd133f6c12e6eb7788f410ac287a0ecbd2e04111c53", 16)
+	prodPrimes10D, _ = new(big.Int).SetString("110ff552b95f8a221746b085d63971478f9c2f463322b634950e79a577287a6cc18a2ee3760e5b73461c471a251fc2804b6923fd57", 16)
 	// all squares mod 1155 = 3 * 5 * 7 * 11
 	smallSquareMod = big.NewInt(3 * 5 * 7 * 11)
 	smallSquares   = map[uint16]bool{

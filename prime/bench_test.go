@@ -64,6 +64,12 @@ func BenchmarkSmallPrimeTest(b *testing.B) {
 	}
 }
 
+func BenchmarkSmallPrimeTestRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		SmallPrimeTest(randBig(1024))
+	}
+}
+
 func BenchmarkStrongMillerRabin(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		StrongMillerRabin(benchmarkPrime, 2)

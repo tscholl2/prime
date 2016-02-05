@@ -151,6 +151,28 @@ func TestMillerRabin(t *testing.T) {
 	}
 }
 
+func TestSmallPrime(t *testing.T) {
+	cases := []struct {
+		in   *big.Int
+		want int
+	}{
+		{big.NewInt(221), 0},
+		{big.NewInt(221 * 1234), 0},
+		{big.NewInt(7), 1},
+		{big.NewInt(11), 1},
+		{big.NewInt(13), 1},
+		{big.NewInt(1709), -1},
+		{big.NewInt(2005), 0},
+		{big.NewInt(2047 * 2031), 0},
+		{big.NewInt(173000001), 0},
+		{big.NewInt(1753647563), 0},
+		{big.NewInt(583519), -1},
+	}
+	for _, c := range cases {
+		assert.Equal(t, SmallPrimeTest(c.in), c.want, fmt.Sprintf("in=%d", c.in))
+	}
+}
+
 func TestNextPrime(t *testing.T) {
 	cases := []struct {
 		in, want *big.Int
