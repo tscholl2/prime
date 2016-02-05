@@ -160,7 +160,7 @@ func SmallPrimeTest(N *big.Int) int {
 // for compositeness of N or N is a strong
 // pseudoprime base a.
 //
-// ProbablyPrime if you want to do a lot
+// Use builtin ProbablyPrime if you want to do a lot
 // of random tests, this is for one specific
 // base value.
 func StrongMillerRabin(N *big.Int, a int64) bool {
@@ -181,15 +181,14 @@ func StrongMillerRabin(N *big.Int, a int64) bool {
 
 	// Step 2: compute powers a^d
 	// and then a^(d*2^r) for 0<r<s
-	var nm1, Ad big.Int
-	Ad.Exp(A, d, N)
-	nm1.Sub(N, one)
-	if Ad.Cmp(one) == 0 || Ad.Cmp(&nm1) == 0 {
+	nm1 := new(big.Int).Sub(N, one)
+	Ad := new(big.Int).Exp(A, d, N)
+	if Ad.Cmp(one) == 0 || Ad.Cmp(nm1) == 0 {
 		return true
 	}
 	for r := uint(1); r < s; r++ {
-		Ad.Exp(&Ad, two, N)
-		if Ad.Cmp(&nm1) == 0 {
+		Ad.Exp(Ad, two, N)
+		if Ad.Cmp(nm1) == 0 {
 			return true
 		}
 	}

@@ -76,6 +76,14 @@ func BenchmarkStrongMillerRabin(b *testing.B) {
 	}
 }
 
+func BenchmarkStrongMillerRabinRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		x := randBig(1024)
+		x.SetBit(x, 0, 1)
+		StrongMillerRabin(x, 2)
+	}
+}
+
 func BenchmarkStrongLucasSelfridgeTest(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		StrongLucasSelfridgeTest(benchmarkPrime)
