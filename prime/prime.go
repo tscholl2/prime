@@ -53,7 +53,7 @@ func RandPrime(bits int) (p *big.Int) {
 
 // NextPrime returns a number, p >= N with
 // high probability that p is the next prime
-// occuring after N.
+// occurring after N.
 func NextPrime(N *big.Int) (p *big.Int) {
 	if N.Sign() <= 0 {
 		return big.NewInt(2)
@@ -155,7 +155,7 @@ func SmallPrimeTest(N *big.Int) int {
 }
 
 // StrongMillerRabin returns true if N is a
-// strong Miller-Rabin psuedoprime in base a.
+// strong Miller-Rabin pseudoprime in base a.
 // That is, it returns false if a is a witness
 // for compositeness of N or N is a strong
 // pseudoprime base a.

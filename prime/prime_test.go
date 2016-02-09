@@ -116,7 +116,7 @@ func TestStrongLucasSelfridgeTest(t *testing.T) {
 		{big.NewInt(797), true},
 		{big.NewInt(3571 * 3571), false}, // perfect square
 		{big.NewInt(3571), true},         // large prime
-		{big.NewInt(5459), true},         // NOT prime! a strong Lucas psuedoprime
+		{big.NewInt(5459), true},         // NOT prime! a strong Lucas pseudoprime
 		{n, true},                        //also a strong lsps!, BPSW says composite though
 		{big.NewInt(364387 * 362751), false},
 		{big.NewInt(364387 * 362753), false},
