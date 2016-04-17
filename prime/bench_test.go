@@ -84,17 +84,17 @@ func BenchmarkStrongMillerRabinRandom(b *testing.B) {
 	}
 }
 
-func BenchmarkStrongLucasSelfridgeTest(b *testing.B) {
+func BenchmarkStrongLucasSelfridge(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		StrongLucasSelfridgeTest(benchmarkPrime)
+		StrongLucasSelfridge(benchmarkPrime)
 	}
 }
 
-func BenchmarkStrongLucasSelfridgeTestRandom(b *testing.B) {
+func BenchmarkStrongLucasSelfridgeRandom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x := randBig(1024)
 		x.SetBit(x, 0, 1)
-		StrongLucasSelfridgeTest(x)
+		StrongLucasSelfridge(x)
 	}
 }
 
@@ -135,9 +135,15 @@ func BenchmarkProbablyPrime(b *testing.B) {
 	}
 }
 
+func BenchmarkSolovayStrassen(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		SolovayStrassen(benchmarkPrime, 20)
+	}
+}
+
 // random primality tests
 
-func BenchmarkBPSWRand(b *testing.B) {
+func BenchmarkBPSWRandom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		BPSW(randBig(1024))
 	}
@@ -146,5 +152,11 @@ func BenchmarkBPSWRand(b *testing.B) {
 func BenchmarkProbablyPrimeRandom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		randBig(1024).ProbablyPrime(20)
+	}
+}
+
+func BenchmarkSolovayStrassenRandom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		SolovayStrassen(randBig(1024), 20)
 	}
 }

@@ -102,7 +102,7 @@ func TestIsSquare(t *testing.T) {
 	}
 }
 
-func TestStrongLucasSelfridgeTest(t *testing.T) {
+func TestStrongLucasSelfridge(t *testing.T) {
 	n, _ := new(big.Int).SetString("319889369713946602502766595032347", 10)
 	//http://www.sciencedirect.com/science/article/pii/S0747717185710425
 	cases := []struct {
@@ -124,7 +124,7 @@ func TestStrongLucasSelfridgeTest(t *testing.T) {
 		{big.NewInt(364387 * 362757), false},
 	}
 	for _, c := range cases {
-		assert.Equal(t, c.want, StrongLucasSelfridgeTest(c.in), fmt.Sprintf("in=%d", c.in))
+		assert.Equal(t, c.want, StrongLucasSelfridge(c.in), fmt.Sprintf("in=%d", c.in))
 	}
 }
 
@@ -211,5 +211,28 @@ func TestJacobiSymbol(t *testing.T) {
 	}
 	for _, c := range cases {
 		assert.Equal(t, c.want, JacobiSymbol(c.N, c.D), fmt.Sprintf("N=%d, D=%d", c.N, c.D))
+	}
+}
+
+func TestSolovayStrassen(t *testing.T) {
+	cases := []struct {
+		N, a *big.Int
+		want bool
+	}{
+		{big.NewInt(221), big.NewInt(47), true},
+		{big.NewInt(221), big.NewInt(2), false},
+		{big.NewInt(561), big.NewInt(2), true},
+		{big.NewInt(565), big.NewInt(2), false},
+		{big.NewInt(1105), big.NewInt(2), true},
+		{big.NewInt(1903), big.NewInt(2), false},
+	}
+	for _, c := range cases {
+		assert.Equal(t, c.want, basedSolovayStrassen(c.N, c.a), fmt.Sprintf("N=%d, a=%d", c.N, c.a))
+	}
+	for i := 0; i < 100; i++ {
+		N := randBig(1024)
+		std := N.ProbablyPrime(20)
+		ss := SolovayStrassen(N, 20)
+		require.Equal(t, std, ss, fmt.Sprintf("N=%d", N))
 	}
 }
