@@ -6,47 +6,49 @@ import (
 	"sort"
 )
 
+const (
+	IsPrime = iota
+	IsComposite
+	Undetermined
+)
+
 // BPSW runs the Baillie-PSW primality test on N.
-// It returns true if N is probably a prime, and false
-// otherwise.
+// An undetermined result is likely prime.
 //
 // For more see http://www.trnicely.net/misc/bpsw.html
-func BPSW(N *big.Int) bool {
+func BPSW(N *big.Int) int {
 	//Step 0: parse input
 	if N.Sign() <= 0 {
 		panic("BPSW is for positive integers only")
 	}
 
 	// Step 1: check  all small primes
-	// returns 1 if prime, 0 if composite, -1 else
 	switch SmallPrimeTest(N) {
-	case 1:
-		return true
-	case 0:
-		return false
+	case IsPrime:
+		return IsPrime
+	case IsComposite:
+		return IsComposite
 	}
 
 	// Step 2: Miller-Rabin test
 	// returns false if composite
-	if !StrongMillerRabin(N, 2) {
-		return false
+	if StrongMillerRabin(N, 2) == IsComposite {
+		return IsComposite
 	}
 
 	// Step 3: Lucas-Selfridge test
 	// returns false if composite
-	if !StrongLucasSelfridge(N) {
-		return false
+	if StrongLucasSelfridge(N) == IsComposite {
+		return IsComposite
 	}
 
 	// Step 4: If didn't fail other tests
 	// return true, i.e. this passed
-	return true
+	return Undetermined
 }
 
-// SmallPrimeTest returns
-// 1 if N is prime
-// 0 if N is composite
-// -1 if undetermined
+// SmallPrimeTest determins if N is a small prime
+// or divisible by a small prime.
 func SmallPrimeTest(N *big.Int) int {
 	if N.Sign() <= 0 {
 		panic("SmallPrimeTest for positive integers only")
@@ -57,48 +59,48 @@ func SmallPrimeTest(N *big.Int) int {
 			return primes10[i] >= n
 		})
 		if i >= len(primes10) || n != primes10[i] {
-			return 0
+			return IsComposite
 		}
-		return 1
+		return IsPrime
 	}
 	// quick test for N even
 	if N.Bits()[0]&1 == 0 {
-		return 0
+		return IsComposite
 	}
 	// compare several small gcds for efficency
 	z := new(big.Int)
 	if z.GCD(nil, nil, N, prodPrimes10A).Cmp(one) == 1 {
-		return 0
+		return IsComposite
 	}
 	if z.GCD(nil, nil, N, prodPrimes10B).Cmp(one) == 1 {
-		return 0
+		return IsComposite
 	}
 	if z.GCD(nil, nil, N, prodPrimes10C).Cmp(one) == 1 {
-		return 0
+		return IsComposite
 	}
 	if z.GCD(nil, nil, N, prodPrimes10D).Cmp(one) == 1 {
-		return 0
+		return IsComposite
 	}
-	return -1
+	return Undetermined
 }
 
-// StrongMillerRabin returns true if N is a
+// StrongMillerRabin checks if N is a
 // strong Miller-Rabin pseudoprime in base a.
-// That is, it returns false if a is a witness
-// for compositeness of N or N is a strong
+// That is, it checks if a is a witness
+// for compositeness of N or if N is a strong
 // pseudoprime base a.
 //
 // Use builtin ProbablyPrime if you want to do a lot
 // of random tests, this is for one specific
 // base value.
-func StrongMillerRabin(N *big.Int, a int64) bool {
+func StrongMillerRabin(N *big.Int, a int64) int {
 	// Step 0: parse input
 	if N.Sign() < 0 || N.Bit(0) == 0 || a < 2 {
 		panic("MR is for positive odd integers with a >= 2")
 	}
 	A := big.NewInt(a)
-	if new(big.Int).GCD(nil, nil, N, A).Cmp(one) != 0 {
-		return false
+	if (a == 2 && N.Bit(0) == 0) || new(big.Int).GCD(nil, nil, N, A).Cmp(one) != 0 {
+		return IsComposite
 	}
 
 	// Step 1: find d,s, so that n - 1 = d*2^s
@@ -112,26 +114,25 @@ func StrongMillerRabin(N *big.Int, a int64) bool {
 	nm1 := new(big.Int).Sub(N, one)
 	Ad := new(big.Int).Exp(A, d, N)
 	if Ad.Cmp(one) == 0 || Ad.Cmp(nm1) == 0 {
-		return true
+		return Undetermined
 	}
 	for r := uint(1); r < s; r++ {
 		Ad.Exp(Ad, two, N)
 		if Ad.Cmp(nm1) == 0 {
-			return true
+			return Undetermined
 		}
 	}
 
-	// Step 3: a is not a witness
-	return false
+	// Step 3: a is a witness for compositeness
+	return IsComposite
 }
 
-// StrongLucasSelfridge returns true if N is
-// a strong Lucas-Selfridge pseudoprime and
-// false otherwise.
+// StrongLucasSelfridge checks if N is
+// a strong Lucas-Selfridge pseudoprime.
 //
 // For more information see
 // http://www.trnicely.net/misc/bpsw.html
-func StrongLucasSelfridge(N *big.Int) bool {
+func StrongLucasSelfridge(N *big.Int) int {
 	// Step 0: parse input
 	if N.Sign() < 0 || N.Bit(0) == 0 {
 		panic("LS is for positive odd integers only")
@@ -139,7 +140,7 @@ func StrongLucasSelfridge(N *big.Int) bool {
 
 	// Step 1: check if N is a perfect square
 	if IsSquare(N) {
-		return false
+		return IsComposite
 	}
 
 	// Step 2: find the first element D in the
@@ -162,7 +163,7 @@ func StrongLucasSelfridge(N *big.Int) bool {
 	Q.Mod(Q, N)
 	if new(big.Int).GCD(nil, nil, N, Q).Cmp(one) != 0 {
 		// sanity check
-		return false
+		return IsComposite
 	}
 
 	// Step 3: Find d so N+1 = 2^s*d with d odd
@@ -210,14 +211,14 @@ func StrongLucasSelfridge(N *big.Int) bool {
 	// U_k, V_k, Q^k are now all with k=d
 	if Uk.Sign() == 0 {
 		// if U_d = 0
-		return true
+		return Undetermined
 	}
 	// Now we look at powers V_{{2^r}d} for r = 0..s-1
 	var r uint
 	for r = 0; r < s; r++ {
 		if Vk.Sign() == 0 {
 			// if V_{2^rd} = 0
-			return true
+			return Undetermined
 		}
 		Vk.Mul(Vk, Vk)
 		Vk.Sub(Vk, tmp.Lsh(Qk, 1))
@@ -227,45 +228,41 @@ func StrongLucasSelfridge(N *big.Int) bool {
 	}
 
 	// Step 5: return false because it didn't pass the test
-	return false
+	return IsComposite
 }
 
-// SolovayStrassen returns true if after choosing k
-// random numbers in [2,...,N] we did not find an
+// SolovayStrassen chooses k random numbers in [2,...,N]
+// and checks that there was no
 // "Euler liar". That is, every number a we chose
 // satisfied a^((n-1)/2) = Jacobi(a/N) mod N.
 // See https://en.wikipedia.org/wiki/Solovay%E2%80%93Strassen_primality_test.
 // Probability it passes and is not prime is 2^(-k).
-func SolovayStrassen(N *big.Int, k int) bool {
-	s := SmallPrimeTest(N)
-	if s == 1 {
-		return true
-	}
-	if s == 0 {
-		return false
+func SolovayStrassen(N *big.Int, k int) int {
+	if N.Bit(0) == 0 && N.BitLen() > 1 {
+		return IsComposite
 	}
 	a := new(big.Int)
 	b := make([]byte, N.BitLen())
 	for i := 0; i < k; i++ {
 		rand.Read(b)
 		a.SetBytes(b)
-		if !basedSolovayStrassen(N, a) {
-			return false
+		if basedSolovayStrassen(N, a) == IsComposite {
+			return IsComposite
 		}
 	}
-	return true
+	return Undetermined
 }
 
-func basedSolovayStrassen(N, a *big.Int) (t bool) {
+func basedSolovayStrassen(N, a *big.Int) int {
 	// we assume N is odd
 	x := JacobiSymbol(a, N)
 	if x == 0 {
-		return
+		return IsComposite
 	}
 	z := new(big.Int)
 	z.Exp(a, z.Rsh(z.Sub(N, one), 1), N) // this step is expensive
 	if (x == 1 && z.Cmp(one) == 0) || (x == -1 && z.Sub(N, z).Cmp(one) == 0) {
-		t = true
+		return Undetermined
 	}
-	return
+	return IsComposite
 }

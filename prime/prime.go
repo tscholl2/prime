@@ -70,7 +70,7 @@ func NextPrime(N *big.Int) (p *big.Int) {
 	i := int(new(big.Int).Mod(N, big.NewInt(int64(m))).Int64())
 	p = new(big.Int).Set(N)
 	for {
-		if BPSW(p) {
+		if BPSW(p) != IsComposite {
 			return
 		}
 		p.Add(p, big.NewInt(int64(diffs210[i])))
