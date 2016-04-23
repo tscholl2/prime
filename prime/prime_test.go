@@ -102,29 +102,29 @@ func TestIsSquare(t *testing.T) {
 	}
 }
 
-func TestStrongLucasSelfridgeTest(t *testing.T) {
+func TestStrongLucasSelfridge(t *testing.T) {
 	n, _ := new(big.Int).SetString("319889369713946602502766595032347", 10)
 	//http://www.sciencedirect.com/science/article/pii/S0747717185710425
 	cases := []struct {
 		in   *big.Int
-		want bool
+		want int
 	}{
-		{big.NewInt(3 * 5 * 11 * 13 * 17), false}, // smooth number
-		{big.NewInt(3), true},                     // some small primes
-		{big.NewInt(5), true},
-		{big.NewInt(11), true},
-		{big.NewInt(797), true},
-		{big.NewInt(3571 * 3571), false}, // perfect square
-		{big.NewInt(3571), true},         // large prime
-		{big.NewInt(5459), true},         // NOT prime! a strong Lucas pseudoprime
-		{n, true},                        //also a strong lsps!, BPSW says composite though
-		{big.NewInt(364387 * 362751), false},
-		{big.NewInt(364387 * 362753), false},
-		{big.NewInt(364387 * 362755), false},
-		{big.NewInt(364387 * 362757), false},
+		{big.NewInt(3 * 5 * 11 * 13 * 17), IsComposite}, // smooth number
+		{big.NewInt(3), Undetermined},                   // some small primes
+		{big.NewInt(5), Undetermined},
+		{big.NewInt(11), Undetermined},
+		{big.NewInt(797), Undetermined},
+		{big.NewInt(3571 * 3571), IsComposite}, // perfect square
+		{big.NewInt(3571), Undetermined},       // large prime
+		{big.NewInt(5459), Undetermined},       // NOT prime! a strong Lucas pseudoprime
+		{n, Undetermined},                      //also a strong lsps!, BPSW says composite though
+		{big.NewInt(364387 * 362751), IsComposite},
+		{big.NewInt(364387 * 362753), IsComposite},
+		{big.NewInt(364387 * 362755), IsComposite},
+		{big.NewInt(364387 * 362757), IsComposite},
 	}
 	for _, c := range cases {
-		assert.Equal(t, c.want, StrongLucasSelfridgeTest(c.in), fmt.Sprintf("in=%d", c.in))
+		assert.Equal(t, c.want, StrongLucasSelfridge(c.in), fmt.Sprintf("in=%d", c.in))
 	}
 }
 
@@ -132,19 +132,19 @@ func TestMillerRabin(t *testing.T) {
 	cases := []struct {
 		inN  *big.Int
 		inA  int64
-		want bool
+		want int
 	}{
-		{big.NewInt(221), 174, true},
-		{big.NewInt(221), 137, false},
-		{big.NewInt(7), 2, true},
-		{big.NewInt(11), 2, true},
-		{big.NewInt(13), 2, true},
-		{big.NewInt(1709), 2, true},
-		{big.NewInt(2005), 2, false},
-		{big.NewInt(2047), 2, true}, // NOT prime!
-		{big.NewInt(173), 6, true},
-		{big.NewInt(175), 5, false}, // not relatively prime
-		{big.NewInt(217), 6, true},  // NOT prime!
+		{big.NewInt(221), 174, Undetermined},
+		{big.NewInt(221), 137, IsComposite},
+		{big.NewInt(7), 2, Undetermined},
+		{big.NewInt(11), 2, Undetermined},
+		{big.NewInt(13), 2, Undetermined},
+		{big.NewInt(1709), 2, Undetermined},
+		{big.NewInt(2005), 2, IsComposite},
+		{big.NewInt(2047), 2, Undetermined}, // NOT prime!
+		{big.NewInt(173), 6, Undetermined},
+		{big.NewInt(175), 5, IsComposite},  // not relatively prime
+		{big.NewInt(217), 6, Undetermined}, // NOT prime!
 	}
 	for _, c := range cases {
 		assert.Equal(t, c.want, StrongMillerRabin(c.inN, c.inA), fmt.Sprintf("N=%d, A=%d", c.inN, c.inA))
@@ -156,17 +156,17 @@ func TestSmallPrime(t *testing.T) {
 		in   *big.Int
 		want int
 	}{
-		{big.NewInt(221), 0},
-		{big.NewInt(221 * 1234), 0},
-		{big.NewInt(7), 1},
-		{big.NewInt(11), 1},
-		{big.NewInt(13), 1},
-		{big.NewInt(1709), -1},
-		{big.NewInt(2005), 0},
-		{big.NewInt(2047 * 2031), 0},
-		{big.NewInt(173000001), 0},
-		{big.NewInt(1753647563), 0},
-		{big.NewInt(583519), -1},
+		{big.NewInt(221), IsComposite},
+		{big.NewInt(221 * 1234), IsComposite},
+		{big.NewInt(7), IsPrime},
+		{big.NewInt(11), IsPrime},
+		{big.NewInt(13), IsPrime},
+		{big.NewInt(1709), Undetermined},
+		{big.NewInt(2005), IsComposite},
+		{big.NewInt(2047 * 2031), IsComposite},
+		{big.NewInt(173000001), IsComposite},
+		{big.NewInt(1753647563), IsComposite},
+		{big.NewInt(583519), Undetermined},
 	}
 	for _, c := range cases {
 		assert.Equal(t, SmallPrimeTest(c.in), c.want, fmt.Sprintf("in=%d", c.in))
@@ -211,5 +211,28 @@ func TestJacobiSymbol(t *testing.T) {
 	}
 	for _, c := range cases {
 		assert.Equal(t, c.want, JacobiSymbol(c.N, c.D), fmt.Sprintf("N=%d, D=%d", c.N, c.D))
+	}
+}
+
+func TestSolovayStrassen(t *testing.T) {
+	cases := []struct {
+		N, a *big.Int
+		want int
+	}{
+		{big.NewInt(221), big.NewInt(47), Undetermined},
+		{big.NewInt(221), big.NewInt(2), IsComposite},
+		{big.NewInt(561), big.NewInt(2), Undetermined},
+		{big.NewInt(565), big.NewInt(2), IsComposite},
+		{big.NewInt(1105), big.NewInt(2), Undetermined},
+		{big.NewInt(1903), big.NewInt(2), IsComposite},
+	}
+	for _, c := range cases {
+		assert.Equal(t, c.want, basedSolovayStrassen(c.N, c.a), fmt.Sprintf("N=%d, a=%d", c.N, c.a))
+	}
+	for i := 0; i < 100; i++ {
+		N := randBig(1024)
+		std := N.ProbablyPrime(20)
+		ss := SolovayStrassen(N, 20)
+		require.Equal(t, std, ss == Undetermined, fmt.Sprintf("N=%d", N))
 	}
 }
