@@ -62,7 +62,7 @@ func TestLeq1(t *testing.T) {
 		{&fpn{big.NewInt(1), -1}, true},
 		{&fpn{big.NewInt(1), 0}, true},
 		{&fpn{big.NewInt(1), 1}, false},
-		{&fpn{big.NewInt(2), -2}, true},
+		{&fpn{big.NewInt(-2), -2}, true},
 		{&fpn{big.NewInt(3), -2}, true},
 		{&fpn{big.NewInt(5), -2}, false},
 		{&fpn{big.NewInt(1023), -10}, true},
@@ -70,6 +70,27 @@ func TestLeq1(t *testing.T) {
 	}
 	for _, c := range cases {
 		require.Equal(t, c.leq1, c.r.leq1(), fmt.Sprintln("n = ", c.r.n, ", a = ", c.r.a))
+	}
+}
+
+func TestLeq993over1024(t *testing.T) {
+	cases := []struct {
+		r   *fpn
+		leq bool
+	}{
+		{new(fpn), true},
+		{&fpn{big.NewInt(1), -1}, true},
+		{&fpn{big.NewInt(1), 0}, false},
+		{&fpn{big.NewInt(1), 1}, false},
+		{&fpn{big.NewInt(2), -2}, true},
+		{&fpn{big.NewInt(3), -2}, true},
+		{&fpn{big.NewInt(5), -2}, false},
+		{&fpn{big.NewInt(994), -10}, false},
+		{&fpn{big.NewInt(993), -10}, true},
+		{&fpn{big.NewInt(992), -10}, true},
+	}
+	for _, c := range cases {
+		require.Equal(t, c.leq, c.r.leq993over1024(), fmt.Sprintln("n = ", c.r.n, ", a = ", c.r.a))
 	}
 }
 
@@ -147,5 +168,24 @@ func TestPowb(t *testing.T) {
 		)
 		require.True(t, s.Cmp(rk) <= 0)
 		require.True(t, rk.Cmp(s12bk) == -1)
+	}
+}
+
+func TestAlgB(t *testing.T) {
+	cases := []struct {
+		r *fpn
+		k uint
+		b uint
+	}{
+		{&fpn{big.NewInt(1000), -1}, 60, 3},
+	}
+	for _, c := range cases {
+		// returns s such that s <= r^k < s(1 + 2^(1 - b))^(2k - 1)
+		yinv := new(big.Rat).Inv(toRat(c.r))
+		sk := powrat(toRat(algB(c.r, c.k, c.b)), int(c.k))
+		a1mbk := powrat(big.NewRat(1<<c.b-1, 1<<c.b), int(c.k))
+		a1pbk := powrat(big.NewRat(1<<c.b+1, 1<<c.b), int(c.k))
+		require.True(t, new(big.Rat).Mul(sk, a1mbk).Cmp(yinv) == -1)
+		require.True(t, yinv.Cmp(new(big.Rat).Mul(sk, a1pbk)) == -1)
 	}
 }

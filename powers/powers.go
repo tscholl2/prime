@@ -7,8 +7,10 @@ import (
 )
 
 var (
-	zero = big.NewInt(0)
-	one  = big.NewInt(1)
+	zero           = big.NewInt(0)
+	one            = big.NewInt(1)
+	negone         = big.NewInt(-1)
+	neg993over1024 = &fpn{big.NewInt(-993), -10}
 )
 
 // floating point numbers
@@ -75,8 +77,13 @@ func (r *fpn) leq1() bool {
 
 // returns true if r <= 993/1024
 func (r *fpn) leq993over1024() bool {
-	// TODO
-	panic("unimplemented")
+	if r == nil || r.n == nil || r.n.Sign() <= 0 {
+		return true
+	}
+	if !r.leq1() {
+		return false
+	}
+	return new(fpn).add(r, neg993over1024).n.Sign() <= 0
 }
 
 // returns ceil(log_2(k))
@@ -161,11 +168,11 @@ func algB(y *fpn, k uint, b uint) *fpn {
 		r := truncb(pz.n, pz.a, B)
 		// 4. if r <= 993/1024 then set z = z + 2^{a - j - 1}
 		if r.leq993over1024() {
-			// TODO
+			z.add(z, &fpn{one, a - int(j) - 1})
 		}
 		// 5. if r > 1 then set z = z - 2^{a - j - 1}
 		if !r.leq1() {
-			// TODO
+			z.add(z, &fpn{negone, a - int(j) - 1})
 		}
 		// 6. set j = j + 1 and go to step 2
 		// done in the for loop
