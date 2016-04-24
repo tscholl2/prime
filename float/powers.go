@@ -7,32 +7,37 @@ import (
 
 var (
 	zero = big.NewInt(0)
-	one = big.NewInt(1)
+	one  = big.NewInt(1)
 )
 
 // floating point numbers
 // this struct represents n * 2^a
 // note (n,a) is equivalent to (2n,a-1).
-type fpn struct{
+type fpn struct {
 	n *big.Int
 	a int
-}
-
-func divb(f *fpn, k *big.Int, b uint) *fpn {
-	s := f.n.BitLen()
-	z := new(big.Int)
-	p := f - int(math.Log(k)) - b
-	z.Rsh(z.Mul(n,k),)
-	return nil
 }
 
 func (f *fpn) normalize() *fpn {
 	s := trailingZeroBits(f.n)
 	f.a = f.a + int(s)
-	f.n.Rsh(f.n,s)
+	f.n.Rsh(f.n, s)
 	return f
 }
 
+func divb(n *big.Int, a int, k *big.Int, b uint) *fpn {
+	g := n.BitLen() - k.BitLen() - int(b)
+	floor := new(big.Int)
+	switch {
+	case g > 0:
+		floor.Div(n, floor.Lsh(k, uint(g)))
+	case g < 0:
+		floor.Div(floor.Lsh(n, uint(-g)), k)
+	default:
+		floor.Div(n, k)
+	}
+	return &fpn{n: floor, a: g + a}
+}
 
 // attempt to find a number within b bits of
 // y^(-1/k)
@@ -60,12 +65,14 @@ func algB(y *big.Int, k, b int) *big.Float {
 	r := 0.5
 	// 4.
 	if r < 993.0/1024.0 {
-		z = z.Add(z,new(big.Int).Lsh(one,uint(a - j - 1)))
+		z = z.Add(z, new(big.Int).Lsh(one, uint(a-j-1)))
 	}
-	
+
 	//TODO
 	return nil
 }
+
+/*
 
 // IsKthPower determins if n = a^k for some integer a.
 // It is written for positive integers >= 2.
@@ -91,6 +98,7 @@ func IsKthPower(n *big.Int, k int64) bool {
 	return false
 }
 
+*/
 
 func trailingZeroBits(x *big.Int) (i uint) {
 	if x.Sign() < 0 {
