@@ -25,6 +25,20 @@ func toRat(r *fpn) *big.Rat {
 	return f
 }
 
+func powrat(r *big.Rat, k int) *big.Rat {
+	if k > 1000 || k < -1000 {
+		panic("too much")
+	}
+	s := new(big.Rat).Set(onerat)
+	for i := 0; i < k; i++ {
+		s.Mul(s, r)
+	}
+	for i := k; i < 0; i++ {
+		s.Mul(s, new(big.Rat).Inv(r))
+	}
+	return s
+}
+
 func pr(r *big.Rat) string {
 	f, _ := r.Float64()
 	return fmt.Sprintf("%0.10f", f)
@@ -33,22 +47,22 @@ func pr(r *big.Rat) string {
 func TestDivb(t *testing.T) {
 	cases := []struct {
 		r *fpn
-		k int64
+		k uint
 		b uint
 	}{
 		{&fpn{big.NewInt(1024), 0}, 1, 10},
 		{&fpn{big.NewInt(1024), 0}, 2, 10},
-		{&fpn{big.NewInt(3255), 0}, 3254, 18},
+		{&fpn{big.NewInt(3255), 0}, 325, 18},
 		{&fpn{big.NewInt(4327), -3}, 4, 100},
-		{&fpn{big.NewInt(1111), 0}, 10000000, 17},
+		{&fpn{big.NewInt(1111), 0}, 100, 17},
 	}
 	for _, c := range cases {
 		s := toRat(divb(c.r.n, c.r.a, c.k, c.b))
-		k := big.NewRat(c.k, 1)
+		k := big.NewRat(int64(c.k), 1)
 		sk := new(big.Rat).Mul(s, k)
 		sk12b := new(big.Rat).Mul(
 			new(big.Rat).Mul(s, k),
-			new(big.Rat).Add(onerat, toRat(&fpn{n: big.NewInt(1), a: 1 - int(c.b)})),
+			new(big.Rat).Add(onerat, powrat(tworat, int(c.k))),
 		)
 		r := toRat(c.r)
 		/*
@@ -59,7 +73,7 @@ func TestDivb(t *testing.T) {
 			fmt.Println("sk12b = ", pr(sk12b))
 		*/
 		require.True(t, sk.Cmp(r) <= 0)
-		require.True(t, sk12b.Cmp(r) == 1)
+		require.True(t, r.Cmp(sk12b) == -1)
 	}
 }
 
@@ -84,17 +98,25 @@ func TestTruncb(t *testing.T) {
 func TestPowb(t *testing.T) {
 	cases := []struct {
 		r *fpn
-		k int64
+		k uint
 		b uint
 	}{
 		{&fpn{big.NewInt(1024), 0}, 1, 10},
 		{&fpn{big.NewInt(1024), 0}, 2, 10},
-		{&fpn{big.NewInt(3255), 0}, 3254, 18},
+		{&fpn{big.NewInt(3255), 0}, 30, 18},
 		{&fpn{big.NewInt(4327), -3}, 4, 100},
-		{&fpn{big.NewInt(1111), 0}, 10000000, 17},
+		{&fpn{big.NewInt(1111), 0}, 5, 17},
 	}
 	for _, c := range cases {
-		out := powb(c.r, c.k, c.b)
-		require.Equal(t, expected, out)
+		// returns s such that s <= r^k < s(1 + 2^(1 - b))^(2k - 1)
+		r := toRat(c.r)
+		s := toRat(powb(c.r, c.k, c.b))
+		rk := powrat(r, int(c.k))
+		s12bk := new(big.Rat).Mul(
+			s,
+			powrat(new(big.Rat).Add(onerat, powrat(tworat, int(c.k))), int(2*c.k-1)),
+		)
+		require.True(t, s.Cmp(rk) <= 0)
+		require.True(t, rk.Cmp(s12bk) == -1)
 	}
 }

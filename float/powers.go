@@ -1,6 +1,7 @@
 package float
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 )
@@ -26,6 +27,9 @@ func (r *fpn) normalize() *fpn {
 }
 
 func (r *fpn) mul(s, t *fpn) *fpn {
+	if r.n == nil {
+		r.n = new(big.Int)
+	}
 	r.n.Mul(s.n, t.n)
 	r.a = s.a + t.a
 	return r
@@ -36,7 +40,7 @@ func logCeil(k uint) int {
 	return int(math.Ceil((math.Log2(float64(k)))))
 }
 
-// returns s such that s <= r/k < s(1 + 2^(1 - b)), where r = n*2^a
+// returns s such that s <= r/k < s(1 + 2^(1 - b)) where r = n*2^a
 func divb(n *big.Int, a int, k uint, b uint) *fpn {
 	if k <= 0 {
 		panic("no")
@@ -55,6 +59,7 @@ func divb(n *big.Int, a int, k uint, b uint) *fpn {
 	return &fpn{n: floor, a: g + a}
 }
 
+// returns s such that s <= r < s(1 + 2^(1 - b)) where r = n*2^a
 func truncb(n *big.Int, a int, b uint) *fpn {
 	g := n.BitLen() - int(b)
 	n2 := new(big.Int)
@@ -70,6 +75,7 @@ func truncb(n *big.Int, a int, b uint) *fpn {
 	return &fpn{n2, a + g}
 }
 
+// returns s such that s <= r^k < s(1 + 2^(1 - b))^(2k - 1)
 func powb(r *fpn, k uint, b uint) *fpn {
 	if k == 0 {
 		panic("no")
@@ -79,6 +85,9 @@ func powb(r *fpn, k uint, b uint) *fpn {
 		return truncb(r.n, r.a, b)
 	case k%2 == 0:
 		s := powb(r, k>>1, b)
+		if s == nil || s.n == nil {
+			fmt.Println(r.n, r.a, k, b)
+		}
 		s.mul(s, s)
 		return truncb(s.n, s.a, b)
 	}
