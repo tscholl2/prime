@@ -18,25 +18,74 @@ type fpn struct {
 	a int
 }
 
-func (f *fpn) normalize() *fpn {
-	s := trailingZeroBits(f.n)
-	f.a = f.a + int(s)
-	f.n.Rsh(f.n, s)
-	return f
+func (r *fpn) normalize() *fpn {
+	i := trailingZeroBits(r.n)
+	r.a = r.a + int(i)
+	r.n.Rsh(r.n, i)
+	return r
 }
 
-func divb(n *big.Int, a int, k *big.Int, b uint) *fpn {
-	g := n.BitLen() - k.BitLen() - int(b)
+func (r *fpn) mul(s, t *fpn) *fpn {
+	r.n.Mul(s.n, t.n)
+	r.a = s.a + t.a
+	return r
+}
+
+// returns ceil(log_2(k))
+func logCeil(k uint) int {
+	return int(math.Ceil((math.Log2(float64(k)))))
+}
+
+// returns s such that s <= r/k < s(1 + 2^(1 - b)), where r = n*2^a
+func divb(n *big.Int, a int, k uint, b uint) *fpn {
+	if k <= 0 {
+		panic("no")
+	}
+	g := n.BitLen() - logCeil(k) - int(b)
 	floor := new(big.Int)
+	bk := big.NewInt(int64(k))
 	switch {
 	case g > 0:
-		floor.Div(n, floor.Lsh(k, uint(g)))
+		floor.Div(n, floor.Lsh(bk, uint(g)))
 	case g < 0:
-		floor.Div(floor.Lsh(n, uint(-g)), k)
+		floor.Div(floor.Lsh(n, uint(-g)), bk)
 	default:
-		floor.Div(n, k)
+		floor.Div(n, bk)
 	}
 	return &fpn{n: floor, a: g + a}
+}
+
+func truncb(n *big.Int, a int, b uint) *fpn {
+	g := n.BitLen() - int(b)
+	n2 := new(big.Int)
+	switch {
+	case g > 0:
+		n2.Rsh(n, uint(g))
+	case g < 0:
+		n2.Lsh(n, uint(-g))
+	}
+	if n.BitLen() < g {
+		return &fpn{new(big.Int), 0}
+	}
+	return &fpn{n2, a + g}
+}
+
+func powb(r *fpn, k uint, b uint) *fpn {
+	if k == 0 {
+		panic("no")
+	}
+	switch {
+	case k == 1:
+		return truncb(r.n, r.a, b)
+	case k%2 == 0:
+		s := powb(r, k>>1, b)
+		s.mul(s, s)
+		return truncb(s.n, s.a, b)
+	}
+	s1 := powb(r, k-1, b)
+	s2 := truncb(r.n, r.a, b)
+	s3 := new(fpn).mul(s1, s2)
+	return truncb(s3.n, s3.a, b)
 }
 
 // attempt to find a number within b bits of
