@@ -65,6 +65,20 @@ func (r *fpn) sub(s, t *fpn) *fpn {
 	return r.normalize()
 }
 
+func (r *fpn) cmp(s *fpn) int {
+	if r.n == nil {
+		r.n = new(big.Int)
+	}
+	r.normalize()
+	s.normalize()
+	m := min(r.a, s.a)
+	r.n.Lsh(r.n, uint(r.a-m))
+	r.a = m
+	s.n.Lsh(s.n, uint(s.a-m))
+	s.a = m
+	return r.n.Cmp(s.n)
+}
+
 // returns true if r <= 1
 func (r *fpn) leq1() bool {
 	if r == nil || r.n == nil || r.n.Sign() <= 0 {

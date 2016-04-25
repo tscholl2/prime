@@ -208,3 +208,18 @@ func TestAlgN(t *testing.T) {
 		require.True(t, yinv.Cmp(new(big.Rat).Mul(sk, a1pbk)) == -1)
 	}
 }
+
+func TestAlgC(t *testing.T) {
+	cases := []struct {
+		n    *big.Int
+		x    *fpn
+		k    uint
+		sign int
+	}{
+		{big.NewInt(81), &fpn{big.NewInt(4), 0}, 3, 1},
+	}
+	for _, c := range cases {
+		s := algC(c.n, c.x, c.k)
+		require.Equal(t, c.sign, s, "n = ", c.n, ", x = ", c.x, ", k = ", c.k)
+	}
+}

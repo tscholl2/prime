@@ -126,15 +126,27 @@ func algN(y *fpn, k, b uint) *fpn {
 }
 
 // given positive ints n,x,k return sign of n - x^k
-func algC(n *big.Int, x *fpn, k uint) *fpn {
+func algC(n *big.Int, x *fpn, k uint) int {
+	if n.Sign() <= 0 || x.isZero() || k < 1 {
+		panic("no")
+	}
+	nf := &fpn{n, 0}
 	// initialization
-	//f := n.BitLen() // f = floor(lg(2n))
-	//TODO fix this
+	f := n.BitLen() - 1 // f = floor(lg(2n))
 	// 1. b = 1
-	var b uint = 1
-	// 2. r = pow_{b + ceil(lg(8k))}(x,k)
-	r := powb(x, k, b+3+uint(logCeil(k)))
-	// 3. if n < r, print -1 and stop
-	// TODO finish
-	return r
+	for b := 1; b < f; b = min(2*b, f) {
+		// 2. r = pow_{b + ceil(lg(8k))}(x,k)
+		r := powb(x, k, 3+uint(b+logCeil(k)))
+		// 3. if n < r, return -1 and stop
+		if nf.cmp(r) == -1 {
+			return -1
+		}
+		// 4. if r(1 + 2^(-b)) <= n return 1
+		if r.mul(r, new(fpn).add(&fpn{one, 0}, &fpn{one, -b})).cmp(nf) <= 0 {
+			return 1
+		}
+		// 5. if b >= f return 0
+		// 6. b = min(2b,f), goto step 2
+	}
+	return 0
 }
