@@ -2,6 +2,10 @@ package powers
 
 import "math/big"
 
+var (
+	neg993over1024 = &fpn{big.NewInt(-993), -10}
+)
+
 // floating point numbers
 // this struct represents n * 2^a
 // note (n,a) is equivalent to (2n,a-1).

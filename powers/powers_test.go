@@ -220,6 +220,6 @@ func TestAlgC(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := algC(c.n, c.x, c.k)
-		require.Equal(t, c.sign, s, "n = ", c.n, ", x = ", c.x, ", k = ", c.k)
+		require.Equal(t, c.sign, s, fmt.Sprintf("n = %s, xn = %s, xa = %d, k = %d", c.n, c.x.n, c.x.a, c.k))
 	}
 }

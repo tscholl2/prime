@@ -85,11 +85,11 @@ func algB(y *fpn, k, b uint) *fpn {
 		r := truncb(pz, B)
 		// 4. if r <= 993/1024 then set z = z + 2^{a - j - 1}
 		if r.leq993over1024() {
-			z.add(z, &fpn{one, a - int(j) - 1})
+			z.add(z, &fpn{big.NewInt(1), a - int(j) - 1})
 		}
 		// 5. if r > 1 then set z = z - 2^{a - j - 1}
 		if !r.leq1() {
-			z.add(z, &fpn{negone, a - int(j) - 1})
+			z.add(z, &fpn{big.NewInt(-1), a - int(j) - 1})
 		}
 		// 6. set j = j + 1 and go to step 2
 		// done in the for loop
@@ -131,18 +131,19 @@ func algC(n *big.Int, x *fpn, k uint) int {
 		panic("no")
 	}
 	nf := &fpn{n, 0}
+	nf.normalize()
 	// initialization
 	f := n.BitLen() - 1 // f = floor(lg(2n))
 	// 1. b = 1
 	for b := 1; b < f; b = min(2*b, f) {
 		// 2. r = pow_{b + ceil(lg(8k))}(x,k)
-		r := powb(x, k, 3+uint(b+logCeil(k)))
+		r := powb(x, k, 3+uint(b+logCeil(k))).normalize()
 		// 3. if n < r, return -1 and stop
 		if nf.cmp(r) == -1 {
 			return -1
 		}
 		// 4. if r(1 + 2^(-b)) <= n return 1
-		if r.mul(r, new(fpn).add(&fpn{one, 0}, &fpn{one, -b})).cmp(nf) <= 0 {
+		if r.mul(r, new(fpn).add(&fpn{big.NewInt(1), 0}, &fpn{big.NewInt(1), -b})).cmp(nf) <= 0 {
 			return 1
 		}
 		// 5. if b >= f return 0
