@@ -107,7 +107,7 @@ func TestDivb(t *testing.T) {
 		{&fpn{big.NewInt(1111), 0}, 100, 17},
 	}
 	for _, c := range cases {
-		s := toRat(divb(c.r.n, c.r.a, c.k, c.b))
+		s := toRat(divb(c.r, c.k, c.b))
 		k := big.NewRat(int64(c.k), 1)
 		sk := new(big.Rat).Mul(s, k)
 		sk12b := new(big.Rat).Mul(
@@ -139,8 +139,8 @@ func TestTruncb(t *testing.T) {
 		{&fpn{big.NewInt(1111), 0}, 17},
 	}
 	for _, c := range cases {
-		expected := divb(c.r.n, c.r.a, 1, c.b)
-		output := truncb(c.r.n, c.r.a, c.b)
+		expected := divb(c.r, 1, c.b)
+		output := truncb(c.r, c.b)
 		require.Equal(t, expected, output)
 	}
 }
@@ -177,12 +177,31 @@ func TestAlgB(t *testing.T) {
 		k uint
 		b uint
 	}{
-		{&fpn{big.NewInt(1000), -1}, 60, 3},
+		{&fpn{big.NewInt(1000), -1}, 60, 9},
+		{&fpn{big.NewInt(43628), 8}, 45, 9},
+		{&fpn{big.NewInt(119), -3}, 62, 8},
 	}
 	for _, c := range cases {
-		// returns s such that s <= r^k < s(1 + 2^(1 - b))^(2k - 1)
 		yinv := new(big.Rat).Inv(toRat(c.r))
 		sk := powrat(toRat(algB(c.r, c.k, c.b)), int(c.k))
+		a1mbk := powrat(big.NewRat(1<<c.b-1, 1<<c.b), int(c.k))
+		a1pbk := powrat(big.NewRat(1<<c.b+1, 1<<c.b), int(c.k))
+		require.True(t, new(big.Rat).Mul(sk, a1mbk).Cmp(yinv) == -1)
+		require.True(t, yinv.Cmp(new(big.Rat).Mul(sk, a1pbk)) == -1)
+	}
+}
+
+func TestAlgN(t *testing.T) {
+	cases := []struct {
+		r *fpn
+		k uint
+		b uint
+	}{
+		{&fpn{big.NewInt(1001), -1}, 60, 11},
+	}
+	for _, c := range cases {
+		yinv := new(big.Rat).Inv(toRat(c.r))
+		sk := powrat(toRat(algN(c.r, c.k, c.b)), int(c.k))
 		a1mbk := powrat(big.NewRat(1<<c.b-1, 1<<c.b), int(c.k))
 		a1pbk := powrat(big.NewRat(1<<c.b+1, 1<<c.b), int(c.k))
 		require.True(t, new(big.Rat).Mul(sk, a1mbk).Cmp(yinv) == -1)
