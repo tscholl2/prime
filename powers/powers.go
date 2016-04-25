@@ -64,6 +64,9 @@ func powb(r *fpn, k, b uint) *fpn {
 	return truncb(s.mul(s, truncb(r, b)), b)
 }
 
+// given positive y,k,b returns s such that
+// s(1 - 2^(-b)) < y^(-1/k) < s(1 + 2^(-b))
+// for b <= ceil(lg(8k))
 func algB(y *fpn, k, b uint) *fpn {
 	if y.isZero() {
 		return new(fpn)
@@ -97,6 +100,9 @@ func algB(y *fpn, k, b uint) *fpn {
 	return z
 }
 
+// given positive y,k,b returns s such that
+// s(1 - 2^(-b)) < y^(-1/k) < s(1 + 2^(-b))
+// for b > ceil(lg(8k))
 func algN(y *fpn, k, b uint) *fpn {
 	if y.isZero() {
 		return new(fpn)
@@ -125,6 +131,15 @@ func algN(y *fpn, k, b uint) *fpn {
 	return &r4
 }
 
+// given positive y,k,b returns s such that
+// s(1 - 2^(-b)) < y^(-1/k) < s(1 + 2^(-b))
+func nrootb(y *fpn, k, b uint) *fpn {
+	if b < 4+uint(logCeil(k)) {
+		return algB(y, k, b)
+	}
+	return algN(y, k, b)
+}
+
 // given positive ints n,x,k return sign of n - x^k
 func algC(n *big.Int, x *fpn, k uint) int {
 	if n.Sign() <= 0 || x.isZero() || k < 1 {
@@ -150,4 +165,23 @@ func algC(n *big.Int, x *fpn, k uint) int {
 		// 6. b = min(2b,f), goto step 2
 	}
 	return 0
+}
+
+// given n <= 2, k >= 2, return whether n is a kth power
+func algK(n *big.Int, k uint) {
+	if n.Sign() <= 0 || n.BitLen() < 2 || k < 2 {
+		panic("no")
+	}
+	// initialization
+	f := logCeil(uint(n.BitLen()))                  // f = floor(lg(2n))
+	b := 3 + uint(math.Ceil(float64(f)/float64(k))) // b = 3 + ceil(f/k)
+	y := nrootb(&fpn{n, 0}, 1, b)                   // y = b-approximation of n^(-1)
+	// 1. r = nrootb(y,k)
+	r := nrootb(y, k)
+	// 2. find integer x such that |r - x| < 5/8
+	// TODO
+	// 3. if x = 0 or |r - x| >= 1/4 return 0
+	// 4. compute the sign of n - x^k with algC
+	// 5. if n = x^k return x
+	// 6. return 0
 }

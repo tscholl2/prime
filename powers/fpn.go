@@ -108,3 +108,8 @@ func (r *fpn) leq993over1024() bool {
 	}
 	return new(fpn).add(r, neg993over1024).n.Sign() <= 0
 }
+
+// returns integer x such that |r - x| < b
+func (r *fpn) nearestInt() (x *big.Int, b float64) {
+
+}
