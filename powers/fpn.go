@@ -110,7 +110,33 @@ func (r *fpn) leq993over1024() bool {
 }
 
 // returns integer x such that |r - x| < 1
-// also returns an upper bound |r - x| < b
+// also returns an approximation of the error |r - x| < b
 func (r *fpn) nearestInt() (x *big.Int, b float64) {
-	//TODO write
+	if r.isZero() {
+		x.SetInt64(0)
+		return
+	}
+	if r.a >= 0 {
+		x.Lsh(r.n, uint(r.a))
+		return
+	}
+	if r.n.Sign() == -1 {
+		s := &fpn{new(big.Int), r.a}
+		s.n.Neg(r.n)
+		x, b = s.nearestInt()
+		x.Neg(x)
+		return
+	}
+	if r.n.BitLen() > -r.a {
+		x.Rsh(r.n, uint(-r.a))
+	} else {
+		x.SetInt64(0)
+	}
+	// first 64 bits past decimal place
+	shft := min(64, -r.a)
+	decpart := new(big.Int)
+	for i := -r.a - shft; i < -r.a; i++ {
+		decpart.SetBit(decpart, -r.a-i, r.n.Bit(i))
+	}
+	// TODO finish
 }
