@@ -177,7 +177,7 @@ func algK(n *big.Int, k uint) {
 	b := 3 + uint(math.Ceil(float64(f)/float64(k))) // b = 3 + ceil(f/k)
 	y := nrootb(&fpn{n, 0}, 1, b)                   // y = b-approximation of n^(-1)
 	// 1. r = nrootb(y,k)
-	r := nrootb(y, k)
+	r := nrootb(y, k, b)
 	// 2. find integer x such that |r - x| < 5/8
 	// TODO
 	// 3. if x = 0 or |r - x| >= 1/4 return 0
