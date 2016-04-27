@@ -109,9 +109,8 @@ func (r *fpn) leq993over1024() bool {
 	return new(fpn).add(r, neg993over1024).n.Sign() <= 0
 }
 
-// returns integer x such that |r - x| < 1
-// also returns an approximation of the error |r - x| < b
-func (r *fpn) nearestInt() (x *big.Int, b float64) {
+// returns integer x such that |r - x| < 5/8
+func (r *fpn) nearestIntLeq5over8() (x *big.Int) {
 	if r.isZero() {
 		x.SetInt64(0)
 		return
@@ -121,22 +120,18 @@ func (r *fpn) nearestInt() (x *big.Int, b float64) {
 		return
 	}
 	if r.n.Sign() == -1 {
-		s := &fpn{new(big.Int), r.a}
-		s.n.Neg(r.n)
-		x, b = s.nearestInt()
+		s := &fpn{new(big.Int).Neg(r.n), r.a}
+		x.Set(s.nearestIntLeq5over8())
 		x.Neg(x)
 		return
 	}
+	// find floor
 	if r.n.BitLen() > -r.a {
 		x.Rsh(r.n, uint(-r.a))
 	} else {
 		x.SetInt64(0)
 	}
-	// first 64 bits past decimal place
-	shft := min(64, -r.a)
-	decpart := new(big.Int)
-	for i := -r.a - shft; i < -r.a; i++ {
-		decpart.SetBit(decpart, -r.a-i, r.n.Bit(i))
-	}
-	// TODO finish
+	// check if closer than 5/8. else choose ceil
+	// TODO
+	return
 }
