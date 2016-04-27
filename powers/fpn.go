@@ -109,8 +109,8 @@ func (r *fpn) leq993over1024() bool {
 	return new(fpn).add(r, neg993over1024).n.Sign() <= 0
 }
 
-// returns integer x such that |r - x| < 5/8
-func (r *fpn) nearestIntLeq5over8() (x *big.Int) {
+// returns integer x such that |r - x| <= 1/2 <  5/8
+func (r *fpn) nearestInt() (x *big.Int) {
 	if r.isZero() {
 		x.SetInt64(0)
 		return
@@ -121,7 +121,7 @@ func (r *fpn) nearestIntLeq5over8() (x *big.Int) {
 	}
 	if r.n.Sign() == -1 {
 		s := &fpn{new(big.Int).Neg(r.n), r.a}
-		x.Set(s.nearestIntLeq5over8())
+		x.Set(s.nearestInt())
 		x.Neg(x)
 		return
 	}
@@ -131,7 +131,7 @@ func (r *fpn) nearestIntLeq5over8() (x *big.Int) {
 	} else {
 		x.SetInt64(0)
 	}
-	// check if closer than 5/8. else choose ceil
+	// check if ceil is actually closer
 	// TODO
 	return
 }
