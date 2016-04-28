@@ -70,8 +70,14 @@ func (r *fpn) sub(s, t *fpn) *fpn {
 }
 
 func (r *fpn) cmp(s *fpn) int {
-	if r.n == nil {
-		r.n = new(big.Int)
+	if r.isZero() {
+		if s.isZero() {
+			return 0
+		}
+		return -s.n.Sign()
+	}
+	if s.isZero() {
+		return r.n.Sign()
 	}
 	r.normalize()
 	s.normalize()
@@ -110,28 +116,26 @@ func (r *fpn) leq993over1024() bool {
 }
 
 // returns integer x such that |r - x| <= 1/2 <  5/8
-func (r *fpn) nearestInt() (x *big.Int) {
+func (r *fpn) round() (x *big.Int) {
+	x = new(big.Int)
 	if r.isZero() {
-		x.SetInt64(0)
 		return
 	}
+	r.normalize()
 	if r.a >= 0 {
-		x.Lsh(r.n, uint(r.a))
-		return
+		return x.Lsh(r.n, uint(r.a))
 	}
 	if r.n.Sign() == -1 {
 		s := &fpn{new(big.Int).Neg(r.n), r.a}
-		x.Set(s.nearestInt())
-		x.Neg(x)
-		return
+		x.Set(s.round())
+		return x.Neg(x)
 	}
+	dec := -r.a
 	// find floor
-	if r.n.BitLen() > -r.a {
-		x.Rsh(r.n, uint(-r.a))
-	} else {
-		x.SetInt64(0)
-	}
+	x.Rsh(r.n, uint(dec))
 	// check if ceil is actually closer
-	// TODO
+	if r.n.BitLen() >= dec && r.n.Bit(dec-1) == 1 {
+		x.Add(x, one)
+	}
 	return
 }

@@ -44,35 +44,6 @@ func pr(r *big.Rat) string {
 	return fmt.Sprintf("%0.10f", f)
 }
 
-func TestAdd(t *testing.T) {
-	s1 := &fpn{big.NewInt(1), 0}
-	s2 := &fpn{big.NewInt(1), -1}
-	s12 := new(fpn).add(s1, s2)
-	r := &fpn{big.NewInt(3), -1}
-	require.Equal(t, r.n, s12.n)
-	require.Equal(t, r.a, s12.a)
-}
-
-func TestLeq1(t *testing.T) {
-	cases := []struct {
-		r    *fpn
-		leq1 bool
-	}{
-		{new(fpn), true},
-		{&fpn{big.NewInt(1), -1}, true},
-		{&fpn{big.NewInt(1), 0}, true},
-		{&fpn{big.NewInt(1), 1}, false},
-		{&fpn{big.NewInt(-2), -2}, true},
-		{&fpn{big.NewInt(3), -2}, true},
-		{&fpn{big.NewInt(5), -2}, false},
-		{&fpn{big.NewInt(1023), -10}, true},
-		{&fpn{big.NewInt(1023), -9}, false},
-	}
-	for _, c := range cases {
-		require.Equal(t, c.leq1, c.r.leq1(), fmt.Sprintln("n = ", c.r.n, ", a = ", c.r.a))
-	}
-}
-
 func TestLeq993over1024(t *testing.T) {
 	cases := []struct {
 		r   *fpn

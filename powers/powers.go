@@ -168,7 +168,7 @@ func algC(n *big.Int, x *fpn, k uint) int {
 }
 
 // given n <= 2, k >= 2, return whether n is a kth power
-func algK(n *big.Int, k uint) {
+func algK(n *big.Int, k uint) *big.Int {
 	if n.Sign() <= 0 || n.BitLen() < 2 || k < 2 {
 		panic("no")
 	}
@@ -179,9 +179,24 @@ func algK(n *big.Int, k uint) {
 	// 1. r = nrootb(y,k)
 	r := nrootb(y, k, b)
 	// 2. find integer x such that |r - x| < 5/8
-	// TODO
+	x := r.round()
 	// 3. if x = 0 or |r - x| >= 1/4 return 0
+	if x.Sign() == 0 {
+		return nil
+	}
+	diff := new(fpn).sub(r, &fpn{x, 0})
+	if diff.n.Sign() < 0 {
+		diff.n.Neg(diff.n)
+	}
+	if diff.cmp(&fpn{big.NewInt(1), -2}) >= 0 {
+		return nil
+	}
 	// 4. compute the sign of n - x^k with algC
+	sign := algC(n, &fpn{x, 0}, k)
 	// 5. if n = x^k return x
+	if sign == 0 {
+		return x
+	}
 	// 6. return 0
+	return nil
 }
