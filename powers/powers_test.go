@@ -44,27 +44,6 @@ func pr(r *big.Rat) string {
 	return fmt.Sprintf("%0.10f", f)
 }
 
-func TestLeq993over1024(t *testing.T) {
-	cases := []struct {
-		r   *fpn
-		leq bool
-	}{
-		{new(fpn), true},
-		{&fpn{big.NewInt(1), -1}, true},
-		{&fpn{big.NewInt(1), 0}, false},
-		{&fpn{big.NewInt(1), 1}, false},
-		{&fpn{big.NewInt(2), -2}, true},
-		{&fpn{big.NewInt(3), -2}, true},
-		{&fpn{big.NewInt(5), -2}, false},
-		{&fpn{big.NewInt(994), -10}, false},
-		{&fpn{big.NewInt(993), -10}, true},
-		{&fpn{big.NewInt(992), -10}, true},
-	}
-	for _, c := range cases {
-		require.Equal(t, c.leq, c.r.leq993over1024(), fmt.Sprintln("n = ", c.r.n, ", a = ", c.r.a))
-	}
-}
-
 func TestDivb(t *testing.T) {
 	cases := []struct {
 		r *fpn
@@ -86,15 +65,8 @@ func TestDivb(t *testing.T) {
 			new(big.Rat).Add(onerat, powrat(tworat, int(c.k))),
 		)
 		r := toRat(c.r)
-		/*
-			fmt.Println("CASE: n = ", c.r.n, ", a = ", c.r.a)
-			fmt.Println("s = ", pr(s))
-			fmt.Println("sk = ", pr(sk))
-			fmt.Println("r = ", pr(r))
-			fmt.Println("sk12b = ", pr(sk12b))
-		*/
-		require.True(t, sk.Cmp(r) <= 0)
-		require.True(t, r.Cmp(sk12b) == -1)
+		require.True(t, sk.Cmp(r) <= 0, fmt.Sprintln("sk = ", sk, ", r = ", c.r))
+		require.True(t, r.Cmp(sk12b) == -1, fmt.Sprintln("r = ", c.r, ", sk12b = ", sk12b))
 	}
 }
 
@@ -112,7 +84,7 @@ func TestTruncb(t *testing.T) {
 	for _, c := range cases {
 		expected := divb(c.r, 1, c.b)
 		output := truncb(c.r, c.b)
-		require.Equal(t, expected, output)
+		require.Equal(t, expected, output, fmt.Sprintf("r = %s, b = %d", c.r, c.b))
 	}
 }
 
@@ -137,8 +109,8 @@ func TestPowb(t *testing.T) {
 			s,
 			powrat(new(big.Rat).Add(onerat, powrat(tworat, int(c.k))), int(2*c.k-1)),
 		)
-		require.True(t, s.Cmp(rk) <= 0)
-		require.True(t, rk.Cmp(s12bk) == -1)
+		require.True(t, s.Cmp(rk) <= 0, fmt.Sprintf("s = %s, rk = %s", s, rk))
+		require.True(t, rk.Cmp(s12bk) == -1, fmt.Sprintf("rk = %s, s12bk = %s", rk, s12bk))
 	}
 }
 
@@ -191,6 +163,21 @@ func TestAlgC(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := algC(c.n, c.x, c.k)
-		require.Equal(t, c.sign, s, fmt.Sprintf("n = %s, xn = %s, xa = %d, k = %d", c.n, c.x.n, c.x.a, c.k))
+		require.Equal(t, c.sign, s, fmt.Sprintf("n = %s, x = %s, k = %d", c.n, c.x, c.k))
+	}
+}
+
+func TestAlgX(t *testing.T) {
+	cases := []struct {
+		n *big.Int
+		x *big.Int
+		p uint
+	}{
+		{big.NewInt(81), big.NewInt(9), 2},
+	}
+	for _, c := range cases {
+		x, p := algX(c.n)
+		require.Equal(t, c.x, x, fmt.Sprintf("n = %s, x = %s, p = %d", c.n, c.x, c.p))
+		require.Equal(t, c.p, p, fmt.Sprintf("n = %s, x = %s, p = %d", c.n, c.x, c.p))
 	}
 }

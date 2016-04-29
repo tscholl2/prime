@@ -1,6 +1,7 @@
 package powers
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 )
@@ -145,7 +146,7 @@ func algC(n *big.Int, x *fpn, k uint) int {
 	if n.Sign() <= 0 || x.isZero() || k < 1 {
 		panic("no")
 	}
-	nf := &fpn{n, 0}
+	nf := &fpn{new(big.Int).Set(n), 0}
 	nf.normalize()
 	// initialization
 	f := n.BitLen() - 1 // f = floor(lg(2n))
@@ -167,19 +168,22 @@ func algC(n *big.Int, x *fpn, k uint) int {
 	return 0
 }
 
-// given n <= 2, k >= 2, return whether n is a kth power
-func algK(n *big.Int, k uint) *big.Int {
+// given n <= 2, k >= 2, and positive floating point number y
+// return whether n is a kth power
+func algK(n *big.Int, k uint, y *fpn) *big.Int {
 	if n.Sign() <= 0 || n.BitLen() < 2 || k < 2 {
 		panic("no")
 	}
+	fmt.Printf("algK(%s,%d,%s)\n", n, k, y)
 	// initialization
 	f := logCeil(uint(n.BitLen()))                  // f = floor(lg(2n))
 	b := 3 + uint(math.Ceil(float64(f)/float64(k))) // b = 3 + ceil(f/k)
-	y := nrootb(&fpn{n, 0}, 1, b)                   // y = b-approximation of n^(-1)
 	// 1. r = nrootb(y,k)
 	r := nrootb(y, k, b)
+	fmt.Printf("nrootb(%s,%d,%d) = %s\n", y, k, b, r)
 	// 2. find integer x such that |r - x| < 5/8
 	x := r.round()
+	fmt.Printf("rounded = %s\n", x)
 	// 3. if x = 0 or |r - x| >= 1/4 return 0
 	if x.Sign() == 0 {
 		return nil
@@ -193,10 +197,44 @@ func algK(n *big.Int, k uint) *big.Int {
 	}
 	// 4. compute the sign of n - x^k with algC
 	sign := algC(n, &fpn{x, 0}, k)
+	fmt.Printf("sign of %s^%d is %d\n", x, k, sign)
 	// 5. if n = x^k return x
 	if sign == 0 {
 		return x
 	}
 	// 6. return 0
 	return nil
+}
+
+func algX(n *big.Int) (*big.Int, uint) {
+	// initialization
+	f := n.BitLen() + 1
+	// 1. y = nroot_{3+ceil(f/2)}(n,1)
+	Y := &fpn{new(big.Int).Set(n), 0}
+	y := nrootb(Y, 1, uint(math.Ceil(float64(f)/2)))
+	// 2. for each prime p < f
+	for _, p := range primesUnder10000 {
+		if p >= uint(f) {
+			break
+		}
+		// 3. set x to result of algK
+		x := algK(n, p, y)
+		fmt.Println("p = ", p, ", x = ", x)
+		// 4. if x > 0 return (x,p)
+		if x != nil {
+			return x, p
+		}
+	}
+	// 5. return (n,1)
+	return n, 1
+}
+
+// IsPerfectPower returns x,k such that n = x^k
+// if no such x,k exist then returns nil,0
+func IsPerfectPower(n *big.Int) (x *big.Int, k int) {
+	x, p := algX(n)
+	if p == 1 {
+		x = nil
+	}
+	return x, int(p)
 }

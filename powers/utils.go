@@ -9,12 +9,6 @@ var (
 	one = big.NewInt(1)
 )
 
-// return 1 +- 2^b
-func onePlusBit(b int, sign int) *fpn {
-	// TODO
-	panic("unimplimeneted")
-}
-
 // returns ceil(log_2(k))
 func logCeil(k uint) int {
 	return int(math.Ceil((math.Log2(float64(k)))))

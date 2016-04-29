@@ -1,6 +1,9 @@
 package powers
 
-import "math/big"
+import (
+	"fmt"
+	"math/big"
+)
 
 var (
 	neg993over1024 = &fpn{big.NewInt(-993), -10}
@@ -12,6 +15,13 @@ var (
 type fpn struct {
 	n *big.Int
 	a int
+}
+
+func (r *fpn) String() string {
+	if r == nil || r.n == nil {
+		return "0 (nil)"
+	}
+	return fmt.Sprintf("%s * 2^%d", r.n, r.a)
 }
 
 func (r *fpn) normalize() *fpn {
