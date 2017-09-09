@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	one = big.NewInt(1)
-	two = big.NewInt(2)
+	zero = big.NewInt(0)
+	one  = big.NewInt(1)
+	two  = big.NewInt(2)
 )
 
 func randBig(bits int) *big.Int {

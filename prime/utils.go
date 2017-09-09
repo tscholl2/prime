@@ -134,3 +134,71 @@ func IsSquare(N *big.Int) bool {
 		}
 	}
 }
+
+type factorization = map[*big.Int]uint64
+
+func factor(N *big.Int) factorization {
+	F := make(factorization)
+	// Find power of 2 dividing F
+	var e int64
+	for ; N.Bit(int(e)) == 0; e++ {
+		count, _ := F[two]
+		F[two] = count + 1
+	}
+	N.Rsh(N, uint(e))
+	// Find upper limit
+	s := new(big.Int)
+	s.Sqrt(N)
+	p := big.NewInt(3)
+	// while p < s and N > 1
+	q := new(big.Int)
+	r := new(big.Int)
+	for p.Cmp(s) != 1 && N.Cmp(one) == 1 {
+		for e = 1; ; e++ {
+			q.QuoRem(N, p, r)
+			if r.BitLen() == 0 {
+				N.Set(q)
+				s.Sqrt(N)
+				F[p] = uint64(e)
+			} else {
+				break
+			}
+		}
+		p = NextPrime(big.NewInt(0).Add(p, two))
+	}
+	if N.Cmp(one) == 1 {
+		F[N] = 1
+	}
+	return F
+}
+
+func lcm(f1, f2 factorization) (f factorization) {
+	a1 := make(factorization)
+	a2 := make(factorization)
+	for p, e := range f1 {
+		a1[p] = e
+	}
+	for p, e := range f2 {
+		a2[p] = e
+	}
+	for p1, e1 := range f1 {
+		for p2, e2 := range f2 {
+			if p1.Cmp(p2) == 1 {
+				if e1 > e2 {
+					f[p1] = e1
+				} else {
+					f[p1] = e2
+				}
+				delete(a1, p1)
+				delete(a2, p2)
+			}
+		}
+		if _, ok := a1[p1]; ok {
+			f[p1] = e1
+		}
+	}
+	for p2, e2 := range a2 {
+		f[p2] = e2
+	}
+	return
+}

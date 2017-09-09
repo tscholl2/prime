@@ -236,3 +236,21 @@ func TestSolovayStrassen(t *testing.T) {
 		require.Equal(t, std, ss == Undetermined, fmt.Sprintf("N=%d", N))
 	}
 }
+
+func TestFactor(t *testing.T) {
+	x := big.NewInt(2 * 2 * 2 * 2 * 3 * 5 * 5 * 11)
+	F := factor(x)
+	require.Len(t, F, 4)
+	for p, e := range F {
+		switch {
+		case p.Int64() == 2:
+			require.Equal(t, e, uint64(4))
+		case p.Int64() == 3:
+			require.Equal(t, e, uint64(1))
+		case p.Int64() == 5:
+			require.Equal(t, e, uint64(2))
+		case p.Int64() == 11:
+			require.Equal(t, e, uint64(1))
+		}
+	}
+}
