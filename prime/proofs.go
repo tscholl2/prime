@@ -67,6 +67,46 @@ func factorProof(N *big.Int) factorization {
 	return F
 }
 
-func IsPrimePowerProof(N *big.Int) bool {
-	return len(factorProof(N)) == 1
+// Returns a,k such that k>=2 and n = a^k or nil,0 if none exist.
+func isPerfectPower(n *big.Int) (a *big.Int, k int) {
+	maxK := n.BitLen() + 1
+	for k := 2; k < maxK; k++ {
+		a = binarySearchKthRoot(n, k)
+		if a != nil {
+			return a, k
+		}
+	}
+	return nil, 0
+}
+
+// Returns a such that n = a^k or nil if no such a exists.
+func binarySearchKthRoot(n *big.Int, k int) (a *big.Int) {
+	if k == 1 {
+		return n
+	}
+	K := big.NewInt(int64(k))
+	test := func(a *big.Int) int {
+		return new(big.Int).Exp(a, K, nil).Cmp(n)
+	}
+	a = new(big.Int)
+	low := big.NewInt(2)
+	if test(low) == 0 {
+		return low
+	}
+	high := new(big.Int).Set(n) // TODO rsh by log_2(n)/k ish
+	for {
+		a.Rsh(a.Add(low, high), 1)
+		t := test(a)
+		if t == 0 {
+			return a
+		}
+		if t == 1 {
+			high.Set(a)
+		} else {
+			low.Set(a)
+		}
+		if a.Sub(high, low).Cmp(one) == 0 {
+			return nil
+		}
+	}
 }

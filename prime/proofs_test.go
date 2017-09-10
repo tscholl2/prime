@@ -43,3 +43,51 @@ func TestSimpleProof(t *testing.T) {
 		})
 	}
 }
+
+func Test_binarySearchKthRoot(t *testing.T) {
+	tests := []struct {
+		name string
+		N    *big.Int
+		k    int
+		want *big.Int
+	}{
+		{"4", big.NewInt(4), 2, big.NewInt(2)},
+		{"9", big.NewInt(9), 2, big.NewInt(3)},
+		{"27", big.NewInt(27), 3, big.NewInt(3)},
+		{"125", big.NewInt(125), 3, big.NewInt(5)},
+		{"124", big.NewInt(124), 5, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := binarySearchKthRoot(tt.N, tt.k)
+			if (got != nil && tt.want != nil && tt.want.Cmp(got) != 0) || (tt.want != nil && got == nil) {
+				t.Errorf("newtonsMethod() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isPerfectPower(t *testing.T) {
+	tests := []struct {
+		name  string
+		n     *big.Int
+		wantA *big.Int
+		wantK int
+	}{
+		// TODO: Add test cases.
+		{"4", big.NewInt(4), big.NewInt(2), 2},
+		{"125", big.NewInt(125), big.NewInt(5), 3},
+		{"30^3", big.NewInt(27000), big.NewInt(2 * 3 * 5), 3},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotA, gotK := isPerfectPower(tt.n)
+			if gotA == nil && tt.wantA != nil {
+				t.Errorf("isPerfectPower() gotA = %v, want %v", gotA, tt.wantA)
+			}
+			if tt.wantA != nil && (tt.wantA.Cmp(gotA) != 0 || tt.wantK != gotK) {
+				t.Errorf("isPerfectPower() gotA = %v, want %v", gotA, tt.wantA)
+			}
+		})
+	}
+}
