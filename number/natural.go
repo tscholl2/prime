@@ -72,7 +72,7 @@ func (x number) add(y, z number) number {
 	// yLength >= zLength
 	var c uint64
 	if cap(x) < yLength+1 {
-		x = make(number, yLength+1) // TODO: use x's slice rather than new one
+		x = make(number, yLength+1)
 	}
 	x = x[:yLength+1]
 	i := 0
@@ -81,10 +81,13 @@ func (x number) add(y, z number) number {
 		c = (x[i] & 0x8000000000000000) >> 63 // top bit
 		x[i] = x[i] & 0x7fffffffffffffff      // clear top bit
 	}
-	for ; i < yLength; i++ {
+	for ; i < yLength && c != 0; i++ {
 		x[i] = y[i] + c
 		c = (x[i] & 0x8000000000000000) >> 63 // top bit
 		x[i] = x[i] & 0x7fffffffffffffff      // clear top bit
+	}
+	for ; i < yLength; i++ {
+		x[i] = y[i]
 	}
 	x[i] = c
 	if c == 0 {
