@@ -52,3 +52,26 @@ func Benchmark_big_add(b *testing.B) {
 		x.Add(y, z)
 	}
 }
+
+func Test_number_setHex(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		x    *number
+		args args
+		want *number
+	}{
+		// TODO: Add test cases.
+		{"1", new(number), args{"01"}, &number{1}},
+		{"16", new(number), args{"10"}, &number{16}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.x.setHex(tt.args.s); !reflect.DeepEqual(*got, *tt.want) {
+				t.Errorf("number.setHex() = %v, want %v", *got, *tt.want)
+			}
+		})
+	}
+}
